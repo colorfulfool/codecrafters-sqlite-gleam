@@ -4,33 +4,20 @@ import gleam/int.{to_string}
 import gleam/io
 
 pub fn main() {
-  // You can use print statements as follows for debugging, they'll be visible when running tests.
-  io.println("Logs from your program will appear here!")
-
-  let args = argv.load().arguments
-
-  case args {
+  case argv.load().arguments {
     [database_file_path, ".dbinfo", ..] -> {
       let assert Ok(rs) = read_stream.open(database_file_path)
-      // Get a file handle to the database file, and skip the first 16 bytes
       let assert Ok(_bytes) = read_stream.read_bytes_exact(rs, 16)
-      // The next 2 bytes hold the page size in big-endian format
       let assert Ok(page_size) = read_stream.read_int16_be(rs)
 
       let assert Ok(_bytes) = read_stream.read_bytes_exact(rs, 10)
       let assert Ok(db_size) = read_stream.read_int32_be(rs)
 
       io.print("database page size: ")
-      io.println(
-        page_size
-        |> to_string,
-      )
+      io.println(page_size |> to_string)
 
       io.print("number of tables: ")
-      io.println(
-        db_size - 1
-        |> to_string,
-      )
+      io.println(db_size - 1 |> to_string)
     }
     _ -> {
       io.println("Unknown command")
