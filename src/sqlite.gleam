@@ -10,14 +10,14 @@ pub fn main() {
       let assert Ok(_bytes) = read_stream.read_bytes_exact(rs, 16)
       let assert Ok(page_size) = read_stream.read_int16_be(rs)
 
-      let assert Ok(_bytes) = read_stream.read_bytes_exact(rs, 10)
-      let assert Ok(db_size) = read_stream.read_int32_be(rs)
+      let assert Ok(_bytes) = read_stream.read_bytes_exact(rs, 85)
+      let assert Ok(page_cells) = read_stream.read_int16_be(rs)
 
       io.print("database page size: ")
       io.println(page_size |> to_string)
 
       io.print("number of tables: ")
-      io.println(db_size - 1 |> to_string)
+      io.println(page_cells |> to_string)
     }
     _ -> {
       io.println("Unknown command")

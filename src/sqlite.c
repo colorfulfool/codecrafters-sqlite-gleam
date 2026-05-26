@@ -4,26 +4,34 @@
 #include <arpa/inet.h>
 
 typedef struct {
-  char format[16];
-  uint16_t page_size; // hex 10 00 => bin 00010000 00000000
-  char empty2[10];
-  uint32_t db_size;
-} preamble_t;
+  char magic_string[16];
+  uint16_t page_size;
+  char unused[82];
+} file_header_t;
 
-static preamble_t preamble;
+typedef struct __attribute__((packed)) {
+  char unused[3];
+  uint16_t page_cells;
+  char unused2[7];
+} page_header_t;
+
+static file_header_t file_header;
+static page_header_t page_header;
 
 int main(int argc, char** argv) {
   if (argc == 3 && strcmp(argv[2], ".dbinfo") == 0) {
     FILE *file = fopen(argv[1], "r");
 
-    fread(&preamble, 1, sizeof(preamble_t), file);
+    fread(&file_header, 1, sizeof(file_header), file);
+    fread(&page_header, 1, sizeof(page_header), file);
+    fclose(file);
 
-    preamble.page_size = ntohs(preamble.page_size);
-    preamble.db_size = ntohl(preamble.db_size);
+    file_header.page_size = ntohs(file_header.page_size);
+    page_header.page_cells = ntohs(page_header.page_cells);
 
-    printf("format: %s\n", preamble.format);
-    printf("database page size: %hu\n", preamble.page_size);
-    printf("number of tables: %u\n", preamble.db_size - 1);
+    printf("magic string: %s\n", file_header.magic_string);
+    printf("database page size: %hu\n", file_header.page_size);
+    printf("number of tables: %u\n", page_header.page_cells);
   } else {
     printf("Unknown command\n");
   }
